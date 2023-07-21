@@ -51,6 +51,6 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ inputs.resourceGroupName }}
-          template: https://raw.githubusercontent.com/amourtialon/azure-custom-templates/main/infrastructure/active-directory/simple-new-active-directory/main.bicep
+          template: ./infrastructure/active-directory/simple-new-active-directory/main.bicep
           parameters: "adminUsername=${{ inputs.adminUsername }} adminPassword=${{ secrets.VM_PASSWORD }} dnsPrefix=${{ inputs.dnsPrefix }} domainName=${{ inputs.domainName }}"
           failOnStdErr: false
