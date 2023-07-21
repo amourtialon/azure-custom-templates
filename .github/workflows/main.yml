@@ -1,0 +1,56 @@
+#on: [push]
+on:
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Resource Group Name"
+        required: true
+        default: "rg-amourtialon-bicep-poc-001"
+        type: string
+      adminUsername:
+        description: "Admin Username"
+        required: true
+        default: "amo"
+        type: string
+      dnsPrefix:
+        description: "DNS Prefix"
+        required: true
+        default: "amo-azure-rg"
+        type: string
+      domainName:
+        description: "Domain Name"
+        required: true
+        default: "amo-azure-rg.com"
+        type: string
+      region:
+          description: "Region"
+          required: true
+          default: "westeurope"
+          type: string
+
+name: Azure ARM
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@main
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        # Log into Azure
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+#Create resrouce group
+      - run: |
+              az group create -n ${{ inputs.resourceGroupName }} -l ${{ inputs.region }}
+        # Deploy Bicep file
+      - name: deploy
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ inputs.resourceGroupName }}
+          template: https://raw.githubusercontent.com/amourtialon/deploy-github-actions-bicep/main/active-directory-new-domain/main.bicep?token=${{ secrets.GITHUB_TOKEN }}
+          parameters: "adminUsername=${{ inputs.adminUsername }} adminPassword=${{ secrets.VM_PASSWORD }} dnsPrefix=${{ inputs.dnsPrefix }} domainName=${{ inputs.domainName }}"
+          failOnStdErr: false
